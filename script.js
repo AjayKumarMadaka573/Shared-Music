@@ -6,7 +6,7 @@ let ws;
 let isPlaying = false;
 
 function connectToServer() {
-  ws = new WebSocket('ws://localhost:3000'); // Replace with your server address
+  ws = new WebSocket('ws://https://github.com/AjayKumarMadaka573/Shared-Music/blob/main/:3000'); // Replace with your server address
 
   ws.onopen = () => {
     console.log('Connected to server');
