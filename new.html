@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        const eventSource = new EventSource("/audio-stream"); // Replace with actual SSE endpoint
+
+let audioCtx;
+let source;
+let audioBuffer = null;
+
+eventSource.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  if (data.type === 'audio') {
+    const chunk = atob(data.chunk); // Example: decode chunk
+    if (!audioBuffer) {
+      audioBuffer = new AudioContext().createBuffer();
+    }
+    
+    // Append chunk to the audio buffer
+    // Assuming the chunks are in the same format (e.g., PCM)
+    const channelCount = 2; // Assuming stereo audio (adjust based on actual format)
+    const existingLength = audioBuffer.length;
+    audioBuffer.getChannelData(0).set(new Float32Array(chunk), existingLength);
+    if (channelCount === 2) {
+      audioBuffer.getChannelData(1).set(new Float32Array(chunk), existingLength);
+    }
+  } else if (data.type === 'end') {
+    if (audioBuffer) {
+      audioCtx = new AudioContext();
+      source = audioCtx.createBufferSource();
+      source.buffer = audioBuffer;
+      source.connect(audioCtx.destination);
+      source.start();
+      audioBuffer = null; // Reset the buffer for the next stream
+    }
+  }
+};
+
+eventSource.onerror = (error) => {
+  console.error("Error receiving audio stream:", error);
+};
+
+    </script>
+</body>
+</html>
